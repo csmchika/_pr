@@ -13,35 +13,35 @@ use App\Http\Controllers\PostController;
 |
 */
 
-Route::group(['middleware' => 'role:user'], function() {
-    Route::get('/1', function() {
-        return 'Добро пожаловать, Юзер';
-    });
-    Route::get('index', 'UserController@index')->name('index');
-});
-
-Route::group(['middleware' => 'role:guest'], function() {
-    Route::get('/1', function() {
-        return 'Добро пожаловать, guest';
-    });
-});
-Route::group(['middleware' => 'role:admin'])->group(function () {
-    Route::get('index', 'UserController@index')->name('index');
-
-
-});
-Route::group(['middleware' => 'role:redactor'], function() {
-    Route::get('index', 'UserController@index')->name('index');
-    Route::get('/2', function() {
-        return 'Добро пожаловать, redactor';
-    });
-});
-Route::group(['middleware' => 'role:superadmin'], function() {
-    Route::get('/1', function() {
-        return 'Добро пожаловать, superadmin';
-    });
-    Route::get('index', 'UserController@index')->name('index');
-});
+//Route::group(['middleware' => 'role:user'], function() {
+//    Route::get('/1', function() {
+//        return 'Добро пожаловать, Юзер';
+//    });
+//    Route::get('index', 'UserController@index')->name('index');
+//});
+//
+//Route::group(['middleware' => 'role:guest'], function() {
+//    Route::get('/1', function() {
+//        return 'Добро пожаловать, guest';
+//    });
+//});
+//Route::group(['middleware' => 'role:admin'])->group(function () {
+//    Route::get('index', 'UserController@index')->name('index');
+//
+//
+//});
+//Route::group(['middleware' => 'role:redactor'], function() {
+//    Route::get('index', 'UserController@index')->name('index');
+//    Route::get('/2', function() {
+//        return 'Добро пожаловать, redactor';
+//    });
+//});
+//Route::group(['middleware' => 'role:superadmin'], function() {
+//    Route::get('/1', function() {
+//        return 'Добро пожаловать, superadmin';
+//    });
+//    Route::get('index', 'UserController@index')->name('index');
+//});
 
 Route::get('/', function() {
     return view('welcome');
@@ -54,3 +54,9 @@ Route::post('login', 'LoginController@auth')->name('auth');
 Route::get('logout', 'LoginController@logout')->name('logout');
 Route::get('index', 'UserController@index')->name('index');
 
+
+Route::group(['middleware' => ['auth']], function() {
+    Route::resource('roles', RoleController::class);
+    Route::resource('users', UserController::class);
+    Route::resource('products', ProductController::class);
+});
