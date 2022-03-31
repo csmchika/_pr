@@ -16,13 +16,8 @@ class HomeController extends Controller
         $this->middleware('auth');
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
     //    Просто возвращаем шаблон
-    public function index()
+    public function index():\Illuminate\Contracts\View\View
     {
         return view('home');
     }

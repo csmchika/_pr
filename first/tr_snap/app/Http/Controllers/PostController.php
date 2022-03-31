@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class PostController extends Controller
 {
@@ -20,35 +21,77 @@ class PostController extends Controller
         $this->middleware('permission:post-delete', ['only' => ['destroy']]);
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
-     */
-    public function index(Request $request)
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $data = Post::latest()->paginate(25);
 
         return view('posts.index',compact('data'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
-     */
-    public function create()
+    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('posts.create');
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @throws ValidationException
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $this->extracted_file($request);
+
+        $input = $request->except(['_token']);
+
+        Post::create($input);
+
+        return redirect()->route('posts.index')
+            ->with('success','Запись успешно создана');
+    }
+
+    public function show(int $id): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
+    {
+        $post = Post::find($id);
+
+        return view('posts.show', compact('post'));
+    }
+
+    public function edit(int $id): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Http\Response|\Illuminate\Contracts\Foundation\Application
+    {
+        $post = Post::find($id);
+
+        return view('posts.edit',compact('post'));
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function update(Request $request, int $id): \Illuminate\Http\RedirectResponse
+    {
+        $this->extracted_file($request);
+
+        $post = Post::find($id);
+
+        $post->update($request->all());
+
+        return redirect()->route('posts.index')
+            ->with('success', 'Запись успешно изменена');
+    }
+
+    public function destroy(int $id): \Illuminate\Http\RedirectResponse
+    {
+        Post::find($id)->delete();
+
+        return redirect()->route('posts.index')
+            ->with('success', 'Запись удалена');
+    }
+
+    /**
+     * @param Request $request
+     * @return void
+     * @throws ValidationException
+     */
+//    Валидация и перенос изображений в storage как отдельная функция
+    public function extracted_file(Request $request): void
     {
         if ($request->hasFile('image')) {
             $filenameWithExt = $request->file('image')->getClientOriginalName();
@@ -63,74 +106,5 @@ class PostController extends Controller
             'body' => 'required',
             'image' => 'image|mimes:jpeg,jpg,png,gif, svg'
         ]);
-
-        $input = $request->except(['_token']);
-
-        Post::create($input);
-
-        return redirect()->route('posts.index')
-            ->with('success','Запись успешно создана');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $post = Post::find($id);
-
-        return view('posts.show', compact('post'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        $post = Post::find($id);
-
-        return view('posts.edit',compact('post'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(Request $request, $id)
-    {
-        $this->validate($request, [
-            'title' => 'required',
-            'body' => 'required',
-        ]);
-
-        $post = Post::find($id);
-
-        $post->update($request->all());
-
-        return redirect()->route('posts.index')
-            ->with('success', 'Запись успешно изменена');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function destroy($id)
-    {
-        Post::find($id)->delete();
-
-        return redirect()->route('posts.index')
-            ->with('success', 'Запись удалена');
     }
 }

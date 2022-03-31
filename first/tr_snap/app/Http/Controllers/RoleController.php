@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -23,13 +24,11 @@ class RoleController extends Controller
         $this->middleware('permission:role-edit', ['only' => ['edit','update']]);
         $this->middleware('permission:role-delete', ['only' => ['destroy']]);
     }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
-     */
-    public function index(Request $request)
+
+//Функция отвечающая на get при выводе всего
+    public function index(): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Http\Response|\Illuminate\Contracts\Foundation\Application
     {
+//        Если пользователь имеет право edit-superadmin(только суперадмин, тогда выводим все роли по правам edit )
         $user = auth()->user();
         $permArray = $user->getAllPermissions()->pluck('name')->toArray();
         if ( in_array( "edit-superadmin" ,$permArray )) {
@@ -59,14 +58,11 @@ class RoleController extends Controller
 
         return view('roles.index', compact('data'));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
-     */
-    public function create()
+//    Функция отвечающая на get при создании ресурса роли
+    public function create(): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Http\Response|\Illuminate\Contracts\Foundation\Application
     {
+        //  Берем права, которые есть у пользователя, те, которых у него нет, тут нет
+
         $user = auth()->user();
         $roleIdStr = DB::table('model_has_roles')->where('model_id', $user->id)->first();
         $roleId = $roleIdStr->role_id;
@@ -76,13 +72,12 @@ class RoleController extends Controller
         return view('roles.create', compact('rolePermissions'));
     }
 
+//    Функция отвечающая на post при создании ресурса роли
+
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @throws ValidationException
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
         $this->validate($request, [
             'name' => 'required|unique:roles,name',
@@ -96,13 +91,7 @@ class RoleController extends Controller
             ->with('success', 'Роль успешно создана');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
-     */
-    public function show($id)
+    public function show(int $id): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $role = Role::find($id);
         $rolePermissions = Permission::join('role_has_permissions', 'role_has_permissions.permission_id', 'permissions.id')
@@ -112,13 +101,7 @@ class RoleController extends Controller
         return view('roles.show', compact('role', 'rolePermissions'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
-     */
-    public function edit($id)
+    public function edit(int $id): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $role = Role::find($id);
         $user = auth()->user();
@@ -136,14 +119,8 @@ class RoleController extends Controller
         return view('roles.edit', compact('role', 'permission', 'rolePermissions'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(Request $request, $id)
+
+    public function update(Request $request, int $id): \Illuminate\Http\RedirectResponse
     {
         $this->validate($request, [
             'name' => 'required',
@@ -160,13 +137,8 @@ class RoleController extends Controller
             ->with('success', 'Роль успешно изменена');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function destroy($id)
+
+    public function destroy(int $id): \Illuminate\Http\RedirectResponse
     {
         Role::find($id)->delete();
 
