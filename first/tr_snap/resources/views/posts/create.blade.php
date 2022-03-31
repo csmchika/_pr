@@ -19,7 +19,7 @@
                 </span>
                 </div>
                 <div class="card-body">
-                    {!! Form::open(array('route' => 'posts.store', 'method'=>'POST')) !!}
+                    {!! Form::open(array('route' => 'posts.store', 'method'=>'POST', 'enctype'=> 'multipart/form-data')) !!}
                     <div class="form-group">
                         <strong>Title:</strong>
                         {!! Form::text('title', null, array('placeholder' => 'Title','class' => 'form-control')) !!}
@@ -28,6 +28,12 @@
                         <strong>Body:</strong>
                         {!! Form::textarea('body', null, array('placeholder' => 'Body','class' => 'form-control')) !!}
                     </div>
+                    @can('upload-files')
+                    <div class="form-group">
+                        <strong>File:</strong>
+                        {!! Form::file('image', null, array('placeholder' => 'Body','class' => 'form-control')) !!}
+                    </div>
+                    @endcan
                     <button type="submit" class="btn btn-primary">Submit</button>
                     {!! Form::close() !!}
                 </div>

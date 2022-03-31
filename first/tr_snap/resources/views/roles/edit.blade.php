@@ -28,21 +28,6 @@
                         <strong>Permission:</strong>
                         <br/>
                         @foreach($permission as $value)
-                            @can('edit-admin')
-                                @if ($value->name == 'edit-superadmin')
-                                    @continue
-                                @endif
-                            @endcan
-                            @can('edit-redactor')
-                                @if ($value->name == 'edit-superadmin' or $value->name == 'edit-admin')
-                                    @continue
-                                @endif
-                            @endcan
-                            @can('edit-user')
-                                @if ($value->name == 'edit-superadmin' or $value->name == 'edit-admin' or $value->name == 'edit-redactor')
-                                    @continue
-                                @endif
-                            @endcan
                             <label>{{ Form::checkbox('permission[]', $value->id, in_array($value->id, $rolePermissions) ? true : false, array('class' => 'name')) }}
                                 {{ $value->name }}</label>
                             <br/>

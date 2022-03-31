@@ -9,7 +9,7 @@
             @endif
             <div class="card">
                 <div class="card-header">Posts
-                    @can('role-create')
+                    @can('post-create')
                         <span class="float-right">
                         <a class="btn btn-primary" href="{{ route('posts.create') }}">New post</a>
                     </span>

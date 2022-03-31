@@ -25,10 +25,20 @@ class UserController extends Controller
         $this->middleware('permission:user-edit', ['only' => ['edit','update']]);
         $this->middleware('permission:user-delete', ['only' => ['destroy']]);
     }
-
     public function index(Request $request)
     {
-        $data = User::orderBy('id', 'desc')->paginate(5);
+
+        $user = auth()->user();
+        $permArray = $user->getAllPermissions()->pluck('name')->toArray();
+        if ( in_array( "edit-superadmin" ,$permArray )) {
+            $data = User::join('model_has_roles', 'model_has_roles.model_id', 'users.id')->join('role_has_permissions', 'role_has_permissions.role_id', 'model_has_roles.role_id')->whereIn('permission_id', ['20','21', '22', '23'])->paginate(25);;
+        } elseif ( in_array( "edit-admin" ,$permArray )) {
+            $data = User::join('model_has_roles', 'model_has_roles.model_id', 'users.id')->join('role_has_permissions', 'role_has_permissions.role_id', 'model_has_roles.role_id')->whereIn('permission_id', ['21', '22', '23'])->paginate(25);;
+        } elseif ( in_array( "edit-redactor" ,$permArray )) {
+            $data = User::join('model_has_roles', 'model_has_roles.model_id', 'users.id')->join('role_has_permissions', 'role_has_permissions.role_id', 'model_has_roles.role_id')->whereIn('permission_id', ['22', '23'])->paginate(25);;
+        } elseif ( in_array( "edit-user" ,$permArray )) {
+            $data = User::join('model_has_roles', 'model_has_roles.model_id', 'users.id')->join('role_has_permissions', 'role_has_permissions.role_id', 'model_has_roles.role_id')->whereIn('permission_id', ['23'])->paginate(25);;
+        }
 
         return view('users.index', compact('data'));
     }
@@ -40,7 +50,17 @@ class UserController extends Controller
      */
     public function create()
     {
-        $roles = Role::pluck('name','name')->all();
+        $user = auth()->user();
+        $permArray = $user->getAllPermissions()->pluck('name')->toArray();
+        if (in_array( "edit-superadmin" ,$permArray )) {
+            $roles = Role::join('role_has_permissions', 'role_has_permissions.role_id', 'roles.id')->whereIn('permission_id', ['20','21', '22', '23'])->pluck('name','name');
+        } elseif ( in_array( "edit-admin" ,$permArray )) {
+            $roles = Role::join('role_has_permissions', 'role_has_permissions.role_id', 'roles.id')->whereIn('permission_id', ['21', '22', '23'])->pluck('name','name');
+        } elseif ( in_array( "edit-redactor" ,$permArray )) {
+            $roles = Role::join('role_has_permissions', 'role_has_permissions.role_id', 'roles.id')->whereIn('permission_id', ['22', '23'])->pluck('name','name');
+        } elseif ( in_array( "edit-user" ,$permArray )) {
+            $roles = Role::join('role_has_permissions', 'role_has_permissions.role_id', 'roles.id')->whereIn('permission_id', ['23'])->pluck('name','name');
+        }
 
         return view('users.create', compact('roles'));
     }
@@ -110,6 +130,7 @@ class UserController extends Controller
     {
         $this->validate($request, [
             'name' => 'required',
+            'login' => 'required|unique:users,login|max:55',
             'email' => 'required|email|unique:users,email,'.$id,
             'password' => 'confirmed',
             'roles' => 'required'

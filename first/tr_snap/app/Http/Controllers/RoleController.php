@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -22,7 +23,6 @@ class RoleController extends Controller
         $this->middleware('permission:role-edit', ['only' => ['edit','update']]);
         $this->middleware('permission:role-delete', ['only' => ['destroy']]);
     }
-
     /**
      * Display a listing of the resource.
      *
@@ -30,7 +30,33 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
-        $data = Role::orderBy('id','DESC')->paginate(5);
+        $user = auth()->user();
+        $permArray = $user->getAllPermissions()->pluck('name')->toArray();
+        if ( in_array( "edit-superadmin" ,$permArray )) {
+            $data = Role::join('role_has_permissions', 'role_has_permissions.role_id', 'roles.id')->whereIn('permission_id', ['20','21', '22', '23'])->paginate(25);
+        } elseif ( in_array( "edit-admin" ,$permArray )) {
+            $data = Role::join('role_has_permissions', 'role_has_permissions.role_id', 'roles.id')->whereIn('permission_id', ['21', '22', '23'])->paginate(25);
+        } elseif ( in_array( "edit-redactor" ,$permArray )) {
+            $data = Role::join('role_has_permissions', 'role_has_permissions.role_id', 'roles.id')->whereIn('permission_id', ['22', '23'])->paginate(25);
+        } elseif ( in_array( "edit-user" ,$permArray )) {
+            $data = Role::join('role_has_permissions', 'role_has_permissions.role_id', 'roles.id')->whereIn('permission_id', ['23'])->paginate(25);
+        }
+
+
+//        for ($i = 20; $i < 24; $i++) {
+//            $perm = DB::table('permissions')->where('permissions_id', $i)->first()->name;
+//            if (in_array($perm, $permArray)) {
+//                array_push($data,  )
+//            }
+//
+//            $data = Role::join('role_has_permissions', 'role_has_permissions.role_id', 'roles.id')->where('role_has_permissions.permission_id', $i)->where('roles.id', not())->toArray();
+//        }
+////       $data = Role::join('role_has_permissions', 'role_has_permissions.role_id', 'roles.id')->where('role_has_permissions.permission_id', $i)->where('roles.id', $roleId)->paginate(5)
+
+//        $permArr = $user->getAllPermissions()->pluck('name')->toArray();
+
+//        $data = Role::join('role_has_permissions', 'role_has_permissions.role_id', 'roles.id')->where('role_has_permissions.permission_id', 23)->paginate(5);
+
         return view('roles.index', compact('data'));
     }
 
@@ -41,9 +67,13 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $permission = Permission::get();
-
-        return view('roles.create', compact('permission'));
+        $user = auth()->user();
+        $roleIdStr = DB::table('model_has_roles')->where('model_id', $user->id)->first();
+        $roleId = $roleIdStr->role_id;
+        $rolePermissions = Permission::join('role_has_permissions', 'role_has_permissions.permission_id', 'permissions.id')
+            ->where('role_has_permissions.role_id', $roleId)
+            ->get();
+        return view('roles.create', compact('rolePermissions'));
     }
 
     /**
@@ -91,7 +121,13 @@ class RoleController extends Controller
     public function edit($id)
     {
         $role = Role::find($id);
-        $permission = Permission::get();
+        $user = auth()->user();
+        $roleIdStr = DB::table('model_has_roles')->where('model_id', $user->id)->first();
+        $roleId = $roleIdStr->role_id;
+        $permission = Permission::join('role_has_permissions', 'role_has_permissions.permission_id', 'permissions.id')
+            ->where('role_has_permissions.role_id',$roleId)
+            ->get();
+
         $rolePermissions = DB::table('role_has_permissions')
             ->where('role_has_permissions.role_id', $id)
             ->pluck('role_has_permissions.permission_id', 'role_has_permissions.permission_id')

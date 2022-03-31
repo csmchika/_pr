@@ -27,7 +27,7 @@ class PostController extends Controller
      */
     public function index(Request $request)
     {
-        $data = Post::latest()->paginate(5);
+        $data = Post::latest()->paginate(25);
 
         return view('posts.index',compact('data'));
     }
@@ -50,10 +50,20 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->hasFile('image')) {
+            $filenameWithExt = $request->file('image')->getClientOriginalName();
+            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+            $extension = $request->file('image')->getClientOriginalExtension();
+            $fileNameToStore = $filename . '_' . time() . '.' . $extension;
+            $request->file('image')->storeAs('public/image', $fileNameToStore);
+        }
+
         $this->validate($request, [
             'title' => 'required',
             'body' => 'required',
+            'image' => 'image|mimes:jpeg,jpg,png,gif, svg'
         ]);
+
         $input = $request->except(['_token']);
 
         Post::create($input);

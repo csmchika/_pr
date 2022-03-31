@@ -9,7 +9,7 @@
             @endif
             <div class="card">
                 <div class="card-header">Permissions
-                    @can('role-create')
+                    @can('permission-create')
                         <span class="float-right">
                         <a class="btn btn-primary" href="{{ route('permissions.create') }}">New Permission</a>
                     </span>
@@ -31,10 +31,10 @@
                                 <td>{{ $permission->name }}</td>
                                 <td>
                                     <a class="btn btn-success" href="{{ route('permissions.show',$permission->id) }}">Show</a>
-                                    @can('role-edit')
+                                    @can('permission-edit')
                                         <a class="btn btn-primary" href="{{ route('permissions.edit',$permission->id) }}">Edit</a>
                                     @endcan
-                                    @can('role-delete')
+                                    @can('permission-delete')
                                         {!! Form::open(['method' => 'DELETE','route' => ['permissions.destroy', $permission->id],'style'=>'display:inline']) !!}
                                         {!! Form::submit('Delete', ['class' => 'btn btn-danger']) !!}
                                         {!! Form::close() !!}

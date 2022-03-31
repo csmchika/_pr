@@ -26,27 +26,29 @@
                         </thead>
                         <tbody>
                         @foreach ($data as $key => $role)
-                            @can('edit-admin')
-                                @if ($role->name == 'superadmin')
-                                    @continue
-                                @endif
-                            @endcan
-                            @can('edit-redactor')
-                                @if ($role->name == 'superadmin' or $role->name == 'admin')
-                                    @continue
-                                @endif
-                            @endcan
-                            @can('edit-user')
-                                @if ($role->name == 'superadmin' or $role->name == 'admin' or $role->name == 'redactor')
-                                    @continue
-                                @endif
-                            @endcan
+{{--                            @can('edit-admin')--}}
+{{--                                @if ($role->name == 'superadmin')--}}
+{{--                                    @continue--}}
+{{--                                @endif--}}
+{{--                            @endcan--}}
+{{--                            @can('edit-redactor')--}}
+{{--                                @if ($role->name == 'superadmin' or $role->name == 'admin')--}}
+{{--                                    @continue--}}
+{{--                                @endif--}}
+{{--                            @endcan--}}
+{{--                            @can('edit-user')--}}
+{{--                                @if ($role->name == 'superadmin' or $role->name == 'admin' or $role->name == 'redactor')--}}
+{{--                                    @continue--}}
+{{--                                @endif--}}
+{{--                            @endcan--}}
                             <tr>
                                 <td>{{ $role->id }}</td>
                                 <td>{{ $role->name }}</td>
                                 <td>
                                     <a class="btn btn-success" href="{{ route('roles.show',$role->id) }}">Show</a>
+                                    @can('role-edit')
                                     <a class="btn btn-primary" href="{{ route('roles.edit',$role->id) }}">Edit</a>
+                                    @endcan
                                     @can('role-delete')
                                         {!! Form::open(['method' => 'DELETE','route' => ['roles.destroy', $role->id],'style'=>'display:inline']) !!}
                                         {!! Form::submit('Delete', ['class' => 'btn btn-danger']) !!}

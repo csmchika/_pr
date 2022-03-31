@@ -26,9 +26,10 @@ class PermissionController extends Controller
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
      */
+    //    Берем все права из модели и закидываем в blade permission.index
     public function index(Request $request)
     {
-        $data = Permission::orderBy('id','DESC')->paginate(5);
+        $data = Permission::orderBy('id','DESC')->paginate(50);
 
         return view('permissions.index', compact('data'));
     }
@@ -38,6 +39,7 @@ class PermissionController extends Controller
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
      */
+    //    Get запрос на создание
     public function create()
     {
         return view('permissions.create');
@@ -49,6 +51,7 @@ class PermissionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
+    //    Post запрос с сохранением права
     public function store(Request $request)
     {
         $this->validate($request, [
@@ -67,6 +70,7 @@ class PermissionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
      */
+    //    Ищем по ID право, показываем
     public function show($id)
     {
         $permission = Permission::find($id);
@@ -80,6 +84,7 @@ class PermissionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
      */
+    //   Get запрос на изменение
     public function edit($id)
     {
         $permission = Permission::find($id);
@@ -94,6 +99,7 @@ class PermissionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\RedirectResponse
      */
+    //   Post запрос на изменение и обновление по тому же ID
     public function update(Request $request, $id)
     {
         $this->validate($request, [
@@ -114,6 +120,7 @@ class PermissionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\RedirectResponse
      */
+    //    Удаление и редирект на главную
     public function destroy($id)
     {
         Permission::find($id)->delete();

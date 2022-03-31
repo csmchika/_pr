@@ -9,9 +9,11 @@
             @endif
             <div class="card">
                 <div class="card-header">Users
-                    <span class="float-right">
-                    <a class="btn btn-primary" href="{{ route('users.create') }}">New User</a>
-                </span>
+                    @can('user-create')
+                        <span class="float-right">
+                        <a class="btn btn-primary" href="{{ route('users.create') }}">New User</a>
+                        </span>
+                    @endcan
                 </div>
                 <div class="card-body">
                     <table class="table">

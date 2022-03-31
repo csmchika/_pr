@@ -21,6 +21,7 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
+    //    Просто возвращаем шаблон
     public function index()
     {
         return view('home');

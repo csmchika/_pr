@@ -21,9 +21,12 @@ use App\Http\Controllers\PostController;
 
 Auth::routes();
 
+//Переброс на На домашний контроллер, который выводит на логин
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/', [HomeController::class, 'index']);
 
+
+//Все аутенфицированные роуты
 Route::group(['middleware' => ['auth']], function() {
     Route::resource('users', UserController::class);
     Route::resource('roles', RoleController::class);
